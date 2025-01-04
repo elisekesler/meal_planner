@@ -1,0 +1,30 @@
+<!-- mealapp/templates/grocery_list.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Grocery List</title>
+</head>
+<body>
+<h2>Grocery List by Aisle</h2>
+
+{% if categorized %}
+  {% for aisle, items in categorized.items %}
+    <h3>{{ aisles_list|index:aisle }} (Aisle {{ aisle }})</h3>
+    <ul>
+      {% for name, units_dict in items %}
+        <li>
+          <strong>{{ name }}</strong>:
+          {% for unit, amount in units_dict.items %}
+            {{ amount|floatformat:2 }} {{ unit }}
+          {% endfor %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endfor %}
+{% else %}
+  <p>No items in the grocery list.</p>
+{% endif %}
+
+<p><a href="{% url 'home' %}">Back to Home</a></p>
+</body>
+</html>

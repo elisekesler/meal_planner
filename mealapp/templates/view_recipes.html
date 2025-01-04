@@ -1,0 +1,33 @@
+<!-- mealapp/templates/view_recipes.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Recipes</title>
+</head>
+<body>
+<h2>All Recipes</h2>
+{% if recipes %}
+  {% for rname, recipe in recipes.items %}
+    <hr>
+    <h3>{{ rname }}</h3>
+    <p><strong>Servings:</strong> {{ recipe.servings }}<br>
+       <strong>Calories/Serving:</strong> {{ recipe.calories_per_serving }}<br>
+       <strong>Fat/Serving:</strong> {{ recipe.fat_per_serving }} g<br>
+       <strong>Carbs/Serving:</strong> {{ recipe.carbs_per_serving }} g<br>
+       <strong>Protein/Serving:</strong> {{ recipe.protein_per_serving }} g</p>
+
+    <p><strong>Ingredients:</strong><br>
+      {% for ing, meas in recipe.ingredients.items %}
+        - {{ ing.name }} (Aisle: {{ ing.aisle }}): {{ meas }} <br>
+      {% endfor %}
+    </p>
+
+    <p><strong>Instructions:</strong><br>{{ recipe.instructions }}</p>
+  {% endfor %}
+{% else %}
+  <p>No recipes available.</p>
+{% endif %}
+
+<p><a href="{% url 'home' %}">Back to Home</a></p>
+</body>
+</html>

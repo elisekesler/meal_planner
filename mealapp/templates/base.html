@@ -1,0 +1,17 @@
+<!-- mealapp/templates/base.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Meal Planner (Django)</title>
+</head>
+<body>
+    <h1>Welcome to the Django Meal Planner!</h1>
+    <ul>
+      <li><a href="{% url 'add_recipe' %}">Add Recipe</a></li>
+      <li><a href="{% url 'view_recipes' %}">View Recipes</a></li>
+      <li><a href="{% url 'meal_plan' %}">Meal Plan</a></li>
+      <li><a href="{% url 'grocery_list' %}">Grocery List</a></li>
+    </ul>
+    <p>This is a bare-bones demo; feel free to style as you wish.</p>
+</body>
+</html>

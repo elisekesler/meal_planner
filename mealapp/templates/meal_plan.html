@@ -1,0 +1,56 @@
+<!-- mealapp/templates/meal_plan.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Meal Plan</title>
+</head>
+<body>
+<h2>Meal Plan</h2>
+<form method="POST">
+    {% csrf_token %}
+    <p>
+      Recipe:
+      <select name="recipe_name">
+        {% for rname in recipes_list %}
+          <option value="{{ rname }}">{{ rname }}</option>
+        {% endfor %}
+      </select>
+    </p>
+    <p>
+      Day:
+      <select name="day">
+        {% for i in "1234567"|make_list %}
+          <option value="{{i}}">Day {{i}}</option>
+        {% endfor %}
+      </select>
+    </p>
+    <button type="submit">Add to Meal Plan</button>
+</form>
+
+<hr>
+<h3>Current Meal Plan</h3>
+{% for day, recs in meal_plan.items %}
+  <strong>{{ day }}:</strong><br>
+  {% if recs %}
+    <ul>
+      {% for recipe in recs %}
+        <li>{{ recipe.name }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No recipes for this day.</p>
+  {% endif %}
+{% endfor %}
+
+<hr>
+<h3>Total Nutrition</h3>
+<p>
+  Calories: {{ totals.calories }} <br>
+  Protein: {{ totals.protein }} g<br>
+  Fat: {{ totals.fat }} g<br>
+  Carbs: {{ totals.carbs }} g
+</p>
+
+<p><a href="{% url 'home' %}">Back to Home</a></p>
+</body>
+</html>

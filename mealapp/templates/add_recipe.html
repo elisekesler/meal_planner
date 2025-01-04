@@ -1,0 +1,29 @@
+<!-- mealapp/templates/add_recipe.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Recipe</title>
+</head>
+<body>
+<h2>Add a New Recipe</h2>
+<form method="POST">
+    {% csrf_token %}
+    <p>Recipe Name: <input type="text" name="recipe_name" required></p>
+    <p>
+        Ingredients (comma-separated, format: Name-Aisle-Amount Unit)<br>
+        <textarea name="ingredients" rows="4" cols="60">Onion-1-2 unit, Flour-3-1 cup</textarea>
+    </p>
+    <p>Instructions:<br>
+       <textarea name="instructions" rows="4" cols="60"></textarea>
+    </p>
+    <p>Calories per Serving: <input type="number" step="0.1" name="calories" value="0.0"></p>
+    <p>Fat per Serving (g): <input type="number" step="0.1" name="fat" value="0.0"></p>
+    <p>Carbs per Serving (g): <input type="number" step="0.1" name="carbs" value="0.0"></p>
+    <p>Protein per Serving (g): <input type="number" step="0.1" name="protein" value="0.0"></p>
+    <p>Servings: <input type="number" name="servings" value="1"></p>
+    <button type="submit">Save Recipe</button>
+</form>
+
+<p><a href="{% url 'home' %}">Back to Home</a></p>
+</body>
+</html>

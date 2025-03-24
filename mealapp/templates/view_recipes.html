@@ -3,26 +3,59 @@
 <html>
 <head>
     <title>View Recipes</title>
+    <style>
+        .nutrition-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #f9f9f9;
+        }
+        .nutrition-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+    </style>
 </head>
 <body>
 <h2>All Recipes</h2>
 {% if recipes %}
-  {% for rname, recipe in recipes.items %}
-    <hr>
-    <h3>{{ rname }}</h3>
-    <p><strong>Servings:</strong> {{ recipe.servings }}<br>
-       <strong>Calories/Serving:</strong> {{ recipe.calories_per_serving }}<br>
-       <strong>Fat/Serving:</strong> {{ recipe.fat_per_serving }} g<br>
-       <strong>Carbs/Serving:</strong> {{ recipe.carbs_per_serving }} g<br>
-       <strong>Protein/Serving:</strong> {{ recipe.protein_per_serving }} g</p>
+  {% for recipe in recipes %}
+    <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0;">
+      <div style="display: flex; justify-content: space-between; align-items: top;">
+        <h3>{{ recipe.name }}</h3>
+        <form method="POST" action="{% url 'delete_recipe' recipe.id %}" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" onclick="return confirm('Are you sure you want to delete this recipe?')" style="color: red;">❌</button>
+        </form>
+      </div>
 
-    <p><strong>Ingredients:</strong><br>
-      {% for ing, meas in recipe.ingredients.items %}
-        - {{ ing.name }} (Aisle: {{ ing.aisle }}): {{ meas }} <br>
-      {% endfor %}
-    </p>
+      <div class="nutrition-box">
+        <h4>Nutrition Information (per serving)</h4>
+        <div class="nutrition-grid">
+          <div>Servings: {{ recipe.servings }}</div>
+          <div>Calories: {{ recipe.calories_per_serving|floatformat:1 }}</div>
+          <div>Protein: {{ recipe.protein_per_serving|floatformat:1 }}g</div>
+          <div>Carbs: {{ recipe.carbs_per_serving|floatformat:1 }}g</div>
+          <div>Fat: {{ recipe.fat_per_serving|floatformat:1 }}g</div>
+        </div>
+      </div>
 
-    <p><strong>Instructions:</strong><br>{{ recipe.instructions }}</p>
+      <h4>Ingredients:</h4>
+      <ul>
+        {% for ingredient in recipe.recipe_ingredients.all %}
+          <li>
+            {{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.ingredient.name }}
+            {% if ingredient.ingredient.calories_per_unit %}
+              ({{ ingredient.ingredient.calories_per_unit }} cal/unit)
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+
+      <h4>Instructions:</h4>
+      <p>{{ recipe.instructions|linebreaks }}</p>
+    </div>
   {% endfor %}
 {% else %}
   <p>No recipes available.</p>

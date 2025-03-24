@@ -1,0 +1,365 @@
+[
+    {
+        "name": "Spinach and Egg Scramble",
+        "instructions": "Heat oil in a small nonstick skillet over medium-high heat. Add spinach and cook until wilted, stirring often, 1 to 2 minutes. Transfer the spinach to a plate. Wipe the pan clean, place over medium heat and add eggs. Cook, stirring once or twice to ensure even cooking, until just set, 1 to 2 minutes. Stir in the spinach, salt and pepper. Serve the scramble with toast and raspberries.",
+        "calories_per_serving": 296,
+        "fat_per_serving": 16,
+        "carbs_per_serving": 21,
+        "protein_per_serving": 18,
+        "servings": 1,
+        "ingredients": [
+            {
+                "name": "Vegetable Oil",
+                "quantity": 1,
+                "unit": "teaspoon",
+                "aisle": 2
+            },
+            {
+                "name": "Baby Spinach",
+                "quantity": 1.5,
+                "unit": "cups",
+                "aisle": 1
+            },
+            {
+                "name": "Egg",
+                "quantity": 2,
+                "unit": "unit",
+                "aisle": 4
+            },
+            {
+                "name": "Salt",
+                "quantity": 1,
+                "unit": "pinch",
+                "aisle": 2
+            },
+            {
+                "name": "Pepper",
+                "quantity": 1,
+                "unit": "pinch",
+                "aisle": 2
+            },
+            {
+                "name": "Whole-grain Bread",
+                "quantity": 1,
+                "unit": "slice",
+                "aisle": 3
+            },
+            {
+                "name": "Raspberries",
+                "quantity": 0.5,
+                "unit": "cups",
+                "aisle": 1
+            }
+        ]
+    },
+    {
+        "name": "Kefir",
+        "instructions": "Just kefir lol",
+        "calories_per_serving": 110,
+        "fat_per_serving": 0,
+        "carbs_per_serving": 0,
+        "protein_per_serving": 0,
+        "servings": 1,
+        "ingredients": [
+            {
+                "name": "Kefir",
+                "quantity": 1,
+                "unit": "cups",
+                "aisle": 4
+            }
+        ]
+    },
+    {
+        "name": "Almonds",
+        "instructions": "Just almonds lol",
+        "calories_per_serving": 206,
+        "fat_per_serving": 0,
+        "carbs_per_serving": 0,
+        "protein_per_serving": 0,
+        "servings": 1,
+        "ingredients": [
+            {
+                "name": "Almonds",
+                "quantity": 0.25,
+                "unit": "cups",
+                "aisle": 2
+            }
+        ]
+    },
+    {
+        "name": "Stuffed Sweet Potato with Hummus Dressing",
+        "instructions": "Prick sweet potato all over with a fork. Microwave on High until cooked through, 7 to 10 minutes. Meanwhile, wash kale and drain, allowing water to cling to the leaves. Place in a medium saucepan; cover and cook over medium-high heat, stirring once or twice, until wilted. Add beans; add a tablespoon or two of water if the pot is dry. Continue cooking, uncovered, stirring occasionally, until the mixture is steaming hot, 1 to 2 minutes. Split the sweet potato open and top with the kale and bean mixture. Combine hummus and 2 tablespoons water in a small dish. Add additional water as needed to reach desired consistency. Drizzle the hummus dressing over the stuffed sweet potato.",
+        "calories_per_serving": 472,
+        "fat_per_serving": 7,
+        "carbs_per_serving": 85,
+        "protein_per_serving": 21,
+        "servings": 1,
+        "ingredients": [
+            {
+                "name": "Sweet Potato",
+                "quantity": 1,
+                "unit": "unit",
+                "aisle": 1
+            },
+            {
+                "name": "Kale",
+                "quantity": 6,
+                "unit": "ounces",
+                "aisle": 1
+            },
+            {
+                "name": "Canned Black Beans",
+                "quantity": 1,
+                "unit": "cups",
+                "aisle": 2
+            },
+            {
+                "name": "Hummus",
+                "quantity": 0.25,
+                "unit": "cups",
+                "aisle": 5
+            },
+            {
+                "name": "Water",
+                "quantity": 2,
+                "unit": "tablespoons",
+                "aisle": 0
+            }
+        ]
+    },
+    {
+        "name": "Quinoa Avocado Salad with Buttermilk Dressing",
+        "instructions": "Whisk buttermilk, crème fraîche, vinegar, 1 tablespoon lemon juice, shallot, garlic, 1/4 teaspoon salt and 1/8 teaspoon pepper in a small bowl. Set aside. Heat 1 tablespoon oil in a medium skillet over medium-high heat. Add 1/4 cup quinoa and cook, stirring occasionally, until crispy, 3 to 4 minutes. Transfer to a plate and let cool. Combine endive and persimmons (or pears) with the remaining 1 cup quinoa, 1 tablespoon oil, 2 tablespoons lemon juice and 1/8 teaspoon each salt and pepper in a medium bowl; toss to coat. Spread on a platter. Drizzle avocado with the remaining 2 tablespoons lemon juice and sprinkle with the remaining 1/8 teaspoon each salt and pepper. Arrange on the platter. Drizzle with the reserved dressing. Serve topped with dill and the crispy quinoa.",
+        "calories_per_serving": 432,
+        "fat_per_serving": 29,
+        "carbs_per_serving": 43,
+        "protein_per_serving": 7,
+        "servings": 4,
+        "ingredients": [
+            {
+                "name": "Buttermilk",
+                "quantity": 0.25,
+                "unit": "cups",
+                "aisle": 4
+            },
+            {
+                "name": "Creme Fraiche",
+                "quantity": 0.25,
+                "unit": "cups",
+                "aisle": 4
+            },
+            {
+                "name": "White Balsamic Vinegar",
+                "quantity": 2,
+                "unit": "tablespoons",
+                "aisle": 2
+            },
+            {
+                "name": "Lemon Juice",
+                "quantity": 5,
+                "unit": "tablespoons",
+                "aisle": 2
+            },
+            {
+                "name": "Shallot",
+                "quantity": 2,
+                "unit": "tablespoons",
+                "aisle": 1
+            },
+            {
+                "name": "Garlic",
+                "quantity": 1,
+                "unit": "clove",
+                "aisle": 1
+            },
+            {
+                "name": "Salt",
+                "quantity": 0.5,
+                "unit": "teaspoons",
+                "aisle": 2
+            },
+            {
+                "name": "Pepper",
+                "quantity": 0.125,
+                "unit": "teaspoons",
+                "aisle": 2
+            },
+            {
+                "name": "Vegetable Oil",
+                "quantity": 2,
+                "unit": "tablespoons",
+                "aisle": 2
+            },
+            {
+                "name": "Quinoa",
+                "quantity": 1.25,
+                "unit": "cups",
+                "aisle": 3
+            },
+            {
+                "name": "Endive",
+                "quantity": 2,
+                "unit": "heads",
+                "aisle": 1
+            },
+            {
+                "name": "Persimmon",
+                "quantity": 2,
+                "unit": "units",
+                "aisle": 1
+            },
+            {
+                "name": "Avocado",
+                "quantity": 2,
+                "unit": "units",
+                "aisle": 1
+            },
+            {
+                "name": "Dill",
+                "quantity": 0.25,
+                "unit": "cups",
+                "aisle": 1
+            }
+        ]
+    },
+    {
+        "name": "Peanut Butter & Chia Berry Jam English Muffin",
+        "instructions": "Microwave berries in a medium microwave-safe bowl for 30 seconds; stir and microwave 30 seconds more. Stir in chia seeds. Spread peanut butter on the English muffin. Top with the berry-chia mixture.",
+        "calories_per_serving": 262,
+        "fat_per_serving": 9,
+        "carbs_per_serving": 41,
+        "protein_per_serving": 10,
+        "servings": 1,
+        "ingredients": [
+            {
+                "name": "Frozen Mixed Berries",
+                "quantity": 0.5,
+                "unit": "cups",
+                "aisle": 6
+            },
+            {
+                "name": "Chia Seeds",
+                "quantity": 2,
+                "unit": "teaspoons",
+                "aisle": 2
+            },
+            {
+                "name": "Peanut Butter",
+                "quantity": 2,
+                "unit": "teaspoons",
+                "aisle": 2
+            },
+            {
+                "name": "Whole Wheat English Muffin",
+                "quantity": 1,
+                "unit": "unit",
+                "aisle": 3
+            }
+        ]
+    },
+    {
+        "name": "Greek Yogurt and Blueberries",
+        "instructions": "mix em",
+        "calories_per_serving": 166,
+        "fat_per_serving": 0,
+        "carbs_per_serving": 0,
+        "protein_per_serving": 0,
+        "servings": 1,
+        "ingredients": [
+            {
+                "name": "Low-fat plain greek yogurt",
+                "quantity": 0.75,
+                "unit": "cups",
+                "aisle": 4
+            },
+            {
+                "name": "Blueberries",
+                "quantity": 0.5,
+                "unit": "cups",
+                "aisle": 1
+            }
+        ]
+    },
+    {
+        "name": "Vegan Superfood Grain Bowls",
+        "instructions": "Prepare quinoa according to package directions; set aside to cool. Combine hummus and lemon juice in a small bowl. Thin with water to desired dressing consistency. Divide the dressing among 4 small condiment containers with lids and refrigerate. Divide baby kale among 4 single-serving containers with lids. Top each with 1/2 cup of the quinoa, 1/2 cup beets, 1/4 cup edamame and 1 tablespoon sunflower seeds. When ready to eat, top with 1/4 avocado and the hummus dressing.",
+        "calories_per_serving": 381,
+        "fat_per_serving": 19,
+        "carbs_per_serving": 43,
+        "protein_per_serving": 16,
+        "servings": 4,
+        "ingredients": [
+            {
+                "name": "Quinoa",
+                "quantity": 1,
+                "unit": "cups",
+                "aisle": 3
+            },
+            {
+                "name": "Hummus",
+                "quantity": 0.5,
+                "unit": "cups",
+                "aisle": 5
+            },
+            {
+                "name": "Lemon Juice",
+                "quantity": 2,
+                "unit": "tablespoons",
+                "aisle": 2
+            },
+            {
+                "name": "Kale",
+                "quantity": 5,
+                "unit": "ounces",
+                "aisle": 1
+            },
+            {
+                "name": "Whole Beets",
+                "quantity": 8,
+                "unit": "ounces",
+                "aisle": 1
+            },
+            {
+                "name": "Edamame",
+                "quantity": 1,
+                "unit": "cups",
+                "aisle": 6
+            },
+            {
+                "name": "Avocado",
+                "quantity": 1,
+                "unit": "unit",
+                "aisle": 1
+            },
+            {
+                "name": "Sunflower Seeds",
+                "quantity": 0.25,
+                "unit": "cups",
+                "aisle": 2
+            }
+        ]
+    },
+    {
+        "name": "Edamame and peach",
+        "instructions": "woo",
+        "calories_per_serving": 259,
+        "fat_per_serving": 0,
+        "carbs_per_serving": 0,
+        "protein_per_serving": 0,
+        "servings": 1,
+        "ingredients": [
+            {
+                "name": "Edamame",
+                "quantity": 1,
+                "unit": "cups",
+                "aisle": 6
+            },
+            {
+                "name": "Peach",
+                "quantity": 1,
+                "unit": "unit",
+                "aisle": 1
+            }
+        ]
+    }
+]

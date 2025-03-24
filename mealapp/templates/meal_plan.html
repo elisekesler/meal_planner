@@ -1,56 +1,188 @@
-<!-- mealapp/templates/meal_plan.html -->
+<!-- meal_plan.html -->
 <!DOCTYPE html>
 <html>
 <head>
     <title>Meal Plan</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script>
+        window.allRecipes = {{ all_recipes|safe }};
+    </script>
 </head>
 <body>
-<h2>Meal Plan</h2>
-<form method="POST">
-    {% csrf_token %}
+    <h2>Meal Plan</h2>
+
+    <div id="meal-plan-adder"></div>
+
+    <form method="POST" action="{% url 'meal_plan' %}">
+        {% csrf_token %}
+        <label for="num_people">Number of People:</label>
+        <input type="number" id="num_people" name="num_people" value="{{ num_people }}" min="1">
+        <button type="submit">Update Meal Plan</button>
+    </form>
+
+    <hr>
+    <h3>Current Meal Plan</h3>
+    {% for day, recipes in meal_plan.items %}
+    <div class="day-section">
+        <h4>{{ day }}</h4>
+        {% if recipes %}
+            <ul>
+            {% for recipe_data in recipes %}
+                <li>
+                    <strong>{{ recipe_data.recipe.name }}</strong>
+                    {% if recipe_data.ingredients %}
+                        <ul>
+                        {% for ingredient in recipe_data.ingredients %}
+                            <li>{{ ingredient.name }} ({{ ingredient.amount }} {{ ingredient.unit }})</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No recipes planned for this day</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <hr>
+    <h3>Total Nutrition Per Person</h3>
     <p>
-      Recipe:
-      <select name="recipe_name">
-        {% for rname in recipes_list %}
-          <option value="{{ rname }}">{{ rname }}</option>
-        {% endfor %}
-      </select>
+        Calories: {{ totals.calories }}<br>
+        Protein: {{ totals.protein }} g<br>
+        Fat: {{ totals.fat }} g<br>
+        Carbs: {{ totals.carbs }} g
     </p>
-    <p>
-      Day:
-      <select name="day">
-        {% for i in "1234567"|make_list %}
-          <option value="{{i}}">Day {{i}}</option>
-        {% endfor %}
-      </select>
-    </p>
-    <button type="submit">Add to Meal Plan</button>
-</form>
 
-<hr>
-<h3>Current Meal Plan</h3>
-{% for day, recs in meal_plan.items %}
-  <strong>{{ day }}:</strong><br>
-  {% if recs %}
-    <ul>
-      {% for recipe in recs %}
-        <li>{{ recipe.name }}</li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No recipes for this day.</p>
-  {% endif %}
-{% endfor %}
+    <form method="POST" action="{% url 'generate_grocery_list' %}">
+        {% csrf_token %}
+        <input type="hidden" name="num_people" value="{{ num_people }}">
+        <button type="submit">Generate Grocery List</button>
+    </form>
 
-<hr>
-<h3>Total Nutrition</h3>
-<p>
-  Calories: {{ totals.calories }} <br>
-  Protein: {{ totals.protein }} g<br>
-  Fat: {{ totals.fat }} g<br>
-  Carbs: {{ totals.carbs }} g
-</p>
+    <script type="text/babel">
+        const MealPlanAdder = () => {
+            const [searchTerm, setSearchTerm] = React.useState('');
+            const [recipes, setRecipes] = React.useState(window.allRecipes || []);
+            const [filteredRecipes, setFilteredRecipes] = React.useState([]);
+            const [showDropdown, setShowDropdown] = React.useState(false);
+            const [selectedDay, setSelectedDay] = React.useState('1');
+            const [servings, setServings] = React.useState(1);
 
-<p><a href="{% url 'home' %}">Back to Home</a></p>
+            React.useEffect(() => {
+                if (searchTerm.trim() === '') {
+                    setFilteredRecipes([]);
+                    return;
+                }
+                const filtered = recipes.filter(recipe =>
+                    recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+                setFilteredRecipes(filtered);
+            }, [searchTerm, recipes]);
+
+            const handleAddRecipe = async (recipe) => {
+                try {
+                    const response = await fetch('/api/add-to-meal-plan/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        },
+                        body: JSON.stringify({
+                            recipe_id: recipe.id,
+                            day: selectedDay,
+                            servings: servings
+                        }),
+                    });
+
+                    if (response.ok) {
+                        window.location.reload();
+                    }
+                } catch (error) {
+                    console.error('Error adding recipe:', error);
+                }
+            };
+
+            return (
+                <div className="max-w-2xl mx-auto p-4 border rounded shadow-sm">
+                    <div className="mb-4 flex gap-4">
+                        <div className="relative flex-1">
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    setShowDropdown(true);
+                                }}
+                                onFocus={() => setShowDropdown(true)}
+                                placeholder="Search for recipes..."
+                                className="w-full p-2 border rounded"
+                            />
+
+                            {showDropdown && filteredRecipes.length > 0 && (
+                                <div className="absolute z-10 w-full mt-1 bg-white border rounded shadow-lg">
+                                    {filteredRecipes.map((recipe) => (
+                                        <div
+                                            key={recipe.id}
+                                            className="p-2 hover:bg-gray-100 cursor-pointer"
+                                            onClick={() => {
+                                                setSearchTerm(recipe.name);
+                                                setShowDropdown(false);
+                                            }}
+                                        >
+                                            {recipe.name}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <select
+                            value={selectedDay}
+                            onChange={(e) => setSelectedDay(e.target.value)}
+                            className="p-2 border rounded"
+                        >
+                            {Array.from({ length: 7 }, (_, i) => (
+                                <option key={i + 1} value={String(i + 1)}>
+                                    Day {i + 1}
+                                </option>
+                            ))}
+                        </select>
+
+                        <input
+                            type="number"
+                            value={servings}
+                            onChange={(e) => setServings(parseInt(e.target.value) || 1)}
+                            min="1"
+                            className="p-2 border rounded w-24"
+                            placeholder="Servings"
+                        />
+                    </div>
+
+                    <button
+                        onClick={() => {
+                            const recipe = recipes.find(r => r.name === searchTerm);
+                            if (recipe) {
+                                handleAddRecipe(recipe);
+                            }
+                        }}
+                        className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        disabled={!recipes.some(r => r.name === searchTerm)}
+                    >
+                        Add Recipe to Meal Plan
+                    </button>
+                </div>
+            );
+        };
+
+        const container = document.getElementById('meal-plan-adder');
+        const root = ReactDOM.createRoot(container);
+        root.render(<MealPlanAdder />);
+    </script>
 </body>
 </html>

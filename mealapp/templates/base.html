@@ -2,16 +2,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Meal Planner (Django)</title>
+    <title>Meal Planner</title>
+    {% load static %}
+    <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
 </head>
 <body>
-    <h1>Welcome to the Django Meal Planner!</h1>
-    <ul>
-      <li><a href="{% url 'add_recipe' %}">Add Recipe</a></li>
-      <li><a href="{% url 'view_recipes' %}">View Recipes</a></li>
-      <li><a href="{% url 'meal_plan' %}">Meal Plan</a></li>
-      <li><a href="{% url 'grocery_list' %}">Grocery List</a></li>
-    </ul>
-    <p>This is a bare-bones demo; feel free to style as you wish.</p>
+    <!-- Header section with purple Comic Sans -->
+    <div class="header">
+        <h1>Welcome to this prototype meal planner!</h1>
+    </div>
+
+    <nav style="text-align: center; margin: 20px 0;">
+        <ul style="list-style-type: none; padding: 0; display: inline-block;">
+            <li style="display: inline; margin-right: 10px;">
+                <a href="{% url 'add_recipe' %}" class="my-button" style="text-decoration: none; padding: 10px 20px; background-color: white; color: black; border-radius: 5px; font-family: 'Comic Sans MS', cursive;">Add Recipe</a>
+            </li>
+            <li style="display: inline; margin-right: 10px;">
+                <a href="{% url 'view_recipes' %}" class="my-button" style="text-decoration: none; padding: 10px 20px; background-color: white; color: black; border-radius: 5px; font-family: 'Comic Sans MS', cursive;">View Recipes</a>
+            </li>
+            <li style="display: inline; margin-right: 10px;">
+                <a href="{% url 'meal_plan' %}" class="my-button" style="text-decoration: none; padding: 10px 20px; background-color: white; color: black; border-radius: 5px; font-family: 'Comic Sans MS', cursive;">Meal Plan</a>
+            </li>
+            <li style="display: inline; margin-right: 10px;">
+                <a href="{% url 'add_ingredient' %}" class="my-button" style="text-decoration: none; padding: 10px 20px; background-color: white; color: black; border-radius: 5px; font-family: 'Comic Sans MS', cursive;">Add Ingredient</a>
+            </li>
+            <li style="display: inline; margin-right: 10px;">
+                <a href="{% url 'view_ingredients' %}" class="my-button" style="text-decoration: none; padding: 10px 20px; background-color: white; color: black; border-radius: 5px; font-family: 'Comic Sans MS', cursive;">View Ingredients</a>
+            </li>
+        </ul>
+    </nav>
+    <footer style="text-align: center; margin-top: 30px; font-family: 'Comic Sans MS', cursive; color: #555;">
+        <p>:D</p>
+    </footer>
 </body>
 </html>

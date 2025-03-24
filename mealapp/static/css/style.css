@@ -1,0 +1,40 @@
+/* style.css */
+
+/* A light grey-green background that's easy on the eyes */
+body {
+  background-color: #d2e0d2;          /* Light grey-green */
+  color: #333333;                    /* Dark text for readability */
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;    /* Default body font */
+}
+
+/* Header area */
+.header {
+  padding: 10px;
+  /* Keep or change this if you want a different header background.
+     For instance, you can use a soft green or leave it transparent. */
+  background-color: #f0f0f0;
+}
+
+/* Header title in purple Comic Sans */
+.header h1 {
+  color: #800080; /* Purple */
+  font-family: 'Comic Sans MS', 'Comic Sans', sans-serif;
+  margin: 0;
+}
+
+/* White buttons with black Comic Sans text */
+.my-button {
+  background-color: #ffffff; /* White button */
+  color: #000000;           /* Black text */
+  font-family: 'Comic Sans MS', 'Comic Sans', sans-serif;
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+}
+
+/* Hover effect: slightly darker grey background */
+.my-button:hover {
+  background-color: #e6e6e6; /* Light grey hover */
+}

@@ -1,0 +1,52 @@
+<!-- mealapp/templates/view_ingredients.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Ingredients</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<h2>All Ingredients</h2>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Aisle</th>
+            <th>Nutrition (per unit)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ingredient in ingredients %}
+        <tr>
+            <td>{{ ingredient.name }}</td>
+            <td>{{ ingredient.aisle }}</td>
+            <td>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="ingredient_id" value="{{ ingredient.id }}">
+                    <label>Calories: <input type="number" step="0.1" name="calories_per_unit" value="{{ ingredient.calories_per_unit|default:'' }}"></label><br>
+                    <label>Protein: <input type="number" step="0.1" name="protein_per_unit" value="{{ ingredient.protein_per_unit|default:'' }}"></label><br>
+                    <label>Carbs: <input type="number" step="0.1" name="carbs_per_unit" value="{{ ingredient.carbs_per_unit|default:'' }}"></label><br>
+                    <label>Fat: <input type="number" step="0.1" name="fat_per_unit" value="{{ ingredient.fat_per_unit|default:'' }}"></label><br>
+                    <button type="submit">Update</button>
+                </form>
+            </td>
+            <td>
+                <form method="POST" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="ingredient_id" value="{{ ingredient.id }}">
+                    <input type="hidden" name="delete" value="true">
+                    <button type="submit" onclick="return confirm('Are you sure you want to delete this ingredient?')">❌</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p><a href="{% url 'home' %}">Back to Home</a></p>
+</body>
+</html>

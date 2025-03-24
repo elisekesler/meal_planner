@@ -14,7 +14,8 @@
         <tr>
             <th>Name</th>
             <th>Aisle</th>
-            <th>Nutrition (per unit)</th>
+            <th>Base Unit</th>
+            <th>Nutrition (per base unit)</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -23,6 +24,7 @@
         <tr>
             <td>{{ ingredient.name }}</td>
             <td>{{ ingredient.aisle }}</td>
+            <td>{{ ingredient.base_unit }}</td>
             <td>
                 <form method="POST">
                     {% csrf_token %}

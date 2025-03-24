@@ -17,4 +17,6 @@ urlpatterns = [
     path('delete-ingredient/<int:ingredient_id>/', views.delete_ingredient, name='delete_ingredient'),
     path('delete-recipe/<int:recipe_id>/', views.delete_recipe, name='delete_recipe'),
     path('api/add-to-meal-plan/', views.add_to_meal_plan, name='add-to-meal-plan'),
+    path('unit-conversions/', views.manage_unit_conversions, name='unit_conversions'),
+    path('test-conversion/', views.test_conversion, name='test_conversion'),
 ]

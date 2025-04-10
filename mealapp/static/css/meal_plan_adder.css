@@ -1,0 +1,121 @@
+/* Basic styling for the improved meal plan adder component */
+.search-container {
+    max-width: 800px;
+    margin: 0 auto 20px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 16px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 16px;
+    padding-right: 40px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+}
+
+.dropdown-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    color: #555;
+}
+
+.search-dropdown {
+    position: absolute;
+    width: 100%;
+    max-height: 240px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-top: 8px;
+    z-index: 10;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.dropdown-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background-color: #f0f7ff;
+}
+
+.recipe-name {
+    font-weight: 500;
+}
+
+.recipe-calories {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+}
+
+.form-col {
+    flex: 1;
+}
+
+.select-input, .number-input {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+}
+
+.submit-button {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: #3b82f6;
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.submit-button:hover {
+    background-color: #2563eb;
+}
+
+.submit-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}

@@ -40,6 +40,10 @@
             <option value="pound">Pound</option>
             <option value="ml">Milliliter</option>
         </select>
+        <p style="font-size: 0.9em; color: #666; margin-top: 5px;">
+            <strong>Note:</strong> The base unit is the unit for which nutritional information is defined.
+            All other units will be converted to this base unit using conversion factors.
+        </p>
     </div>
 
     <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;">
@@ -65,6 +69,84 @@
     <button type="submit" style="margin-bottom: 15px;">Add Ingredient</button>
 </form>
 
+
+
 <p><a href="{% url 'home' %}">Back to Home</a></p>
+
+<!-- Add this to the bottom of your add_recipe.html page, just before the closing </body> tag -->
+<div style="margin-top: 30px; padding: 15px; border: 1px solid #ddd; background-color: #f9f9f9;">
+    <h3>Unit Conversion Debug Tool</h3>
+    <div style="display: flex; gap: 10px;">
+        <div>
+            <label for="debug-ingredient">Ingredient:</label>
+            <input type="text" id="debug-ingredient" list="ingredient-list">
+        </div>
+        <div>
+            <label for="debug-amount">Amount:</label>
+            <input type="number" id="debug-amount" value="1" min="0.1" step="0.1">
+        </div>
+        <div>
+            <label for="debug-unit">Unit:</label>
+            <select id="debug-unit">
+                <option value="gram">gram</option>
+                <option value="cup">cup</option>
+                <option value="tablespoon">tablespoon</option>
+                <option value="teaspoon">teaspoon</option>
+                <option value="ounce">ounce</option>
+                <option value="pound">pound</option>
+                <option value="ml">ml</option>
+                <option value="unit">unit</option>
+            </select>
+        </div>
+        <button id="debug-test-conversion">Test Conversion</button>
+    </div>
+    <div id="debug-result" style="margin-top: 10px; white-space: pre-wrap; font-family: monospace;"></div>
+</div>
+
+<script>
+document.getElementById('debug-test-conversion').addEventListener('click', function() {
+    const ingredient = document.getElementById('debug-ingredient').value.trim();
+    const amount = document.getElementById('debug-amount').value;
+    const unit = document.getElementById('debug-unit').value;
+    const resultDiv = document.getElementById('debug-result');
+
+    if (!ingredient) {
+        resultDiv.textContent = "Please enter an ingredient name";
+        return;
+    }
+
+    resultDiv.textContent = `Testing conversion for ${amount} ${unit} of ${ingredient}...\n`;
+
+    fetch(`/api/ingredient/${encodeURIComponent(ingredient)}/?amount=${amount}&unit=${unit}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('API Response:', data);
+
+            let result = '';
+            if (data.success) {
+                result += `✅ Ingredient found: ${data.name}\n`;
+                result += `Base unit: ${data.base_unit || 'Not specified'}\n`;
+                result += `Conversion: ${amount} ${unit} → ${data.converted_amount || 'N/A'} ${data.base_unit || 'base unit'}\n\n`;
+                result += `Nutrition values:\n`;
+                result += `- Calories: ${data.calories}\n`;
+                result += `- Protein: ${data.protein}g\n`;
+                result += `- Carbs: ${data.carbs}g\n`;
+                result += `- Fat: ${data.fat}g\n`;
+
+                if (data.warning) {
+                    result += `\n⚠️ Warning: ${data.warning}\n`;
+                }
+            } else {
+                result += `❌ Error: ${data.error}\n`;
+            }
+
+            resultDiv.textContent = result;
+        })
+        .catch(error => {
+            resultDiv.textContent = `❌ Error: ${error.message}\n`;
+            console.error('API Error:', error);
+        });
+});
+</script>
 </body>
 </html>

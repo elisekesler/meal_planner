@@ -1,84 +1,292 @@
-<!-- meal_plan.html -->
+<!-- meal_plan.html (fixed version) -->
 <!DOCTYPE html>
 <html>
 <head>
     <title>Meal Plan</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- Load React libraries -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <!-- Load Lucide library correctly -->
+    <script src="https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js"></script>
+    <!-- Pass recipe data to JavaScript -->
     <script>
         window.allRecipes = {{ all_recipes|safe }};
     </script>
+    <style>
+        /* Additional styles to enhance UI */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .day-section {
+            margin-bottom: 30px;
+            border-left: 4px solid #4a5568;
+            padding-left: 15px;
+        }
+
+        .day-section h4 {
+            margin-top: 0;
+            font-size: 1.25rem;
+            color: #2d3748;
+        }
+
+        .recipe-item {
+            background-color: #f7fafc;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .recipe-name {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .ingredient-list {
+            margin-left: 20px;
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+
+        .nutrition-card {
+            background-color: #ebf8ff;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #4299e1;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #3182ce;
+        }
+
+        .people-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .people-form input {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e0;
+        }
+
+        /* Additional styling for recipe adder component */
+        .search-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 10px 10px 40px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            color: #718096;
+        }
+
+        .dropdown {
+            position: absolute;
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            z-index: 10;
+        }
+
+        .dropdown-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f7fafc;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .controls > div {
+            flex: 1;
+        }
+
+        .control-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .add-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .add-button:hover {
+            background-color: #3182ce;
+        }
+
+        .add-button:disabled {
+            background-color: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        .recipe-calories {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+    </style>
 </head>
 <body>
-    <h2>Meal Plan</h2>
-
-    <div id="meal-plan-adder"></div>
-
-    <form method="POST" action="{% url 'meal_plan' %}">
-        {% csrf_token %}
-        <label for="num_people">Number of People:</label>
-        <input type="number" id="num_people" name="num_people" value="{{ num_people }}" min="1">
-        <button type="submit">Update Meal Plan</button>
-    </form>
-
-    <hr>
-    <h3>Current Meal Plan</h3>
-    {% for day, recipes in meal_plan.items %}
-    <div class="day-section">
-        <h4>{{ day }}</h4>
-        {% if recipes %}
-            <ul>
-            {% for recipe_data in recipes %}
-                <li>
-                    <strong>{{ recipe_data.recipe.name }}</strong>
-                    {% if recipe_data.ingredients %}
-                        <ul>
-                        {% for ingredient in recipe_data.ingredients %}
-                            <li>{{ ingredient.name }} ({{ ingredient.amount }} {{ ingredient.unit }})</li>
-                        {% endfor %}
-                        </ul>
-                    {% endif %}
-                </li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>No recipes planned for this day</p>
-        {% endif %}
+    <div class="header">
+        <h1>Meal Plan</h1>
     </div>
-    {% endfor %}
+    <div class="container">
 
-    <hr>
-    <h3>Total Nutrition Per Person</h3>
-    <p>
-        Calories: {{ totals.calories }}<br>
-        Protein: {{ totals.protein }} g<br>
-        Fat: {{ totals.fat }} g<br>
-        Carbs: {{ totals.carbs }} g
-    </p>
+        <!-- React component container -->
+        <div id="meal-plan-adder" class="card"></div>
 
-    <form method="POST" action="{% url 'generate_grocery_list' %}">
-        {% csrf_token %}
-        <input type="hidden" name="num_people" value="{{ num_people }}">
-        <button type="submit">Generate Grocery List</button>
-    </form>
+        <div class="card">
+            <form method="POST" action="{% url 'meal_plan' %}" class="people-form">
+                {% csrf_token %}
+                <label for="num_people">Number of People:</label>
+                <input type="number" id="num_people" name="num_people" value="{{ num_people }}" min="1">
+                <button type="submit" class="btn">Update Meal Plan</button>
+            </form>
+        </div>
+
+        <hr>
+        <h3>Current Meal Plan</h3>
+
+        {% for day, recipes in meal_plan.items %}
+        <div class="day-section">
+            <h4>{{ day }}</h4>
+            {% if recipes %}
+                {% for recipe_data in recipes %}
+                    <div class="recipe-item">
+                        <div class="recipe-name">{{ recipe_data.recipe.name }} ({{ recipe_data.servings }} servings)</div>
+                        {% if recipe_data.ingredients %}
+                            <ul class="ingredient-list">
+                            {% for ingredient in recipe_data.ingredients %}
+                                <li>{{ ingredient.name }} ({{ ingredient.amount|floatformat:1 }} {{ ingredient.unit }})</li>
+                            {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No recipes planned for this day</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <hr>
+        <div class="card nutrition-card">
+            <h3>Total Nutrition Per Person</h3>
+            <p>
+                Calories: {{ totals.calories|floatformat:1 }}<br>
+                Protein: {{ totals.protein|floatformat:1 }} g<br>
+                Fat: {{ totals.fat|floatformat:1 }} g<br>
+                Carbs: {{ totals.carbs|floatformat:1 }} g
+            </p>
+        </div>
+
+        <form method="POST" action="{% url 'generate_grocery_list' %}">
+            {% csrf_token %}
+            <input type="hidden" name="num_people" value="{{ num_people }}">
+            <button type="submit" class="btn">Generate Grocery List</button>
+        </form>
+    </div>
 
     <script type="text/babel">
-        const MealPlanAdder = () => {
-            const [searchTerm, setSearchTerm] = React.useState('');
-            const [recipes, setRecipes] = React.useState(window.allRecipes || []);
-            const [filteredRecipes, setFilteredRecipes] = React.useState([]);
-            const [showDropdown, setShowDropdown] = React.useState(false);
-            const [selectedDay, setSelectedDay] = React.useState('1');
-            const [servings, setServings] = React.useState(1);
+        // Destructure React hooks
+        const { useState, useEffect, useRef } = React;
 
-            React.useEffect(() => {
+        // Define the MealPlanAdder component
+        const MealPlanAdder = () => {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [recipes, setRecipes] = useState([]);
+            const [filteredRecipes, setFilteredRecipes] = useState([]);
+            const [showDropdown, setShowDropdown] = useState(false);
+            const [selectedDay, setSelectedDay] = useState('1');
+            const [servings, setServings] = useState(1);
+            const dropdownRef = useRef(null);
+            const searchInputRef = useRef(null);
+
+            // Close dropdown when clicking outside
+            useEffect(() => {
+                function handleClickOutside(event) {
+                    if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
+                        searchInputRef.current && !searchInputRef.current.contains(event.target)) {
+                        setShowDropdown(false);
+                    }
+                }
+
+                document.addEventListener("mousedown", handleClickOutside);
+                return () => {
+                    document.removeEventListener("mousedown", handleClickOutside);
+                };
+            }, []);
+
+            useEffect(() => {
+                // Get all recipes from the all_recipes context variable
+                const recipesData = window.allRecipes || [];
+                setRecipes(recipesData);
+                // Show all recipes by default
+                setFilteredRecipes(recipesData);
+            }, []);
+
+            useEffect(() => {
                 if (searchTerm.trim() === '') {
-                    setFilteredRecipes([]);
+                    // Show all recipes when search is empty
+                    setFilteredRecipes(recipes);
                     return;
                 }
+
                 const filtered = recipes.filter(recipe =>
                     recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
                 );
@@ -101,6 +309,7 @@
                     });
 
                     if (response.ok) {
+                        // Refresh the page to show updated meal plan
                         window.location.reload();
                     }
                 } catch (error) {
@@ -108,60 +317,80 @@
                 }
             };
 
-            return (
-                <div className="max-w-2xl mx-auto p-4 border rounded shadow-sm">
-                    <div className="mb-4 flex gap-4">
-                        <div className="relative flex-1">
-                            <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => {
-                                    setSearchTerm(e.target.value);
-                                    setShowDropdown(true);
-                                }}
-                                onFocus={() => setShowDropdown(true)}
-                                placeholder="Search for recipes..."
-                                className="w-full p-2 border rounded"
-                            />
+            // Create search icon
+            const SearchIcon = () => (
+                <svg xmlns="http://www.w3.org/2000/svg" className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            );
 
-                            {showDropdown && filteredRecipes.length > 0 && (
-                                <div className="absolute z-10 w-full mt-1 bg-white border rounded shadow-lg">
-                                    {filteredRecipes.map((recipe) => (
+            return (
+                <div>
+                    <h3>Add Recipe to Meal Plan</h3>
+
+                    <div className="search-container" ref={searchInputRef}>
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onFocus={() => setShowDropdown(true)}
+                            placeholder="Search for recipes..."
+                            className="search-input"
+                        />
+                        <SearchIcon />
+
+                        {showDropdown && (
+                            <div className="dropdown" ref={dropdownRef}>
+                                {filteredRecipes.length > 0 ? (
+                                    filteredRecipes.map((recipe) => (
                                         <div
                                             key={recipe.id}
-                                            className="p-2 hover:bg-gray-100 cursor-pointer"
+                                            className="dropdown-item"
                                             onClick={() => {
                                                 setSearchTerm(recipe.name);
                                                 setShowDropdown(false);
                                             }}
                                         >
-                                            {recipe.name}
+                                            <div>{recipe.name}</div>
+                                            <div className="recipe-calories">
+                                                {recipe.calories_per_serving} calories per serving
+                                            </div>
                                         </div>
-                                    ))}
-                                </div>
-                            )}
+                                    ))
+                                ) : (
+                                    <div className="dropdown-item">No recipes found</div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="controls">
+                        <div>
+                            <label>Day:</label>
+                            <select
+                                value={selectedDay}
+                                onChange={(e) => setSelectedDay(e.target.value)}
+                                className="control-input"
+                            >
+                                {Array.from({ length: 7 }, (_, i) => (
+                                    <option key={i + 1} value={String(i + 1)}>
+                                        Day {i + 1}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
-                        <select
-                            value={selectedDay}
-                            onChange={(e) => setSelectedDay(e.target.value)}
-                            className="p-2 border rounded"
-                        >
-                            {Array.from({ length: 7 }, (_, i) => (
-                                <option key={i + 1} value={String(i + 1)}>
-                                    Day {i + 1}
-                                </option>
-                            ))}
-                        </select>
-
-                        <input
-                            type="number"
-                            value={servings}
-                            onChange={(e) => setServings(parseInt(e.target.value) || 1)}
-                            min="1"
-                            className="p-2 border rounded w-24"
-                            placeholder="Servings"
-                        />
+                        <div>
+                            <label>Servings:</label>
+                            <input
+                                type="number"
+                                value={servings}
+                                onChange={(e) => setServings(parseInt(e.target.value) || 1)}
+                                min="1"
+                                className="control-input"
+                            />
+                        </div>
                     </div>
 
                     <button
@@ -171,7 +400,7 @@
                                 handleAddRecipe(recipe);
                             }
                         }}
-                        className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        className="add-button"
                         disabled={!recipes.some(r => r.name === searchTerm)}
                     >
                         Add Recipe to Meal Plan
@@ -180,6 +409,7 @@
             );
         };
 
+        // Render the component to the DOM
         const container = document.getElementById('meal-plan-adder');
         const root = ReactDOM.createRoot(container);
         root.render(<MealPlanAdder />);

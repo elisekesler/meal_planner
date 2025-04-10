@@ -21,23 +21,53 @@
         }
 
         function addIngredientRow() {
+            console.log('Adding new ingredient row');
             const container = document.getElementById('ingredient-container');
+
+            if (!container) {
+                console.error('ingredient-container not found!');
+                return;
+            }
+
             const newRow = document.createElement('div');
             newRow.className = 'ingredient-row';
+
+            // Get the units from the existing select to ensure consistency
+            let unitOptions = '';
+            const existingSelect = document.querySelector('select[name="ingredient_unit[]"]');
+
+            if (existingSelect) {
+                console.log('Copying options from existing select:', existingSelect.outerHTML);
+                Array.from(existingSelect.options).forEach(option => {
+                    unitOptions += `<option value="${option.value}" ${option.disabled ? 'disabled' : ''}>${option.text}</option>`;
+                });
+            } else {
+                console.log('No existing select found, using default options');
+                // Default units if none found
+                unitOptions = `
+                    <option value="" disabled selected>Select unit</option>
+                    <option value="unit">unit</option>
+                    <option value="cup">cup</option>
+                    <option value="tablespoon">tablespoon</option>
+                    <option value="teaspoon">teaspoon</option>
+                    <option value="gram">gram</option>
+                    <option value="ounce">ounce</option>
+                    <option value="ml">ml</option>
+                `;
+            }
+
             newRow.innerHTML = `
                 <input type="text" name="ingredient_name[]" list="ingredient-list" placeholder="Ingredient name" required>
                 <input type="number" name="ingredient_amount[]" step="0.1" placeholder="Amount" required>
                 <select name="ingredient_unit[]" required>
-                    <option value="" disabled selected>Select unit</option>
-                    {% for unit in units %}
-                    <option value="{{ unit }}">{{ unit }}</option>
-                    {% endfor %}
+                    ${unitOptions}
                 </select>
                 <button type="button" onclick="this.parentElement.remove()">Remove</button>
             `;
-            container.appendChild(newRow);
-        }
 
+            container.appendChild(newRow);
+            console.log('New row added:', newRow.outerHTML);
+        }
         document.addEventListener("DOMContentLoaded", function () {
             toggleNutritionInputs(); // Ensure the correct fields are displayed on page load
         });
@@ -118,6 +148,158 @@
       const container = document.getElementById('react-ingredient-form');
       const root = createRoot(container);
       root.render(<AddRecipeForm />);
+    </script>
+
+    <div style="margin-top: 20px; padding: 15px; border: 1px solid #dde; background-color: #f5f5ff;">
+        <h4>Direct Unit Conversion Test</h4>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;">
+            <div>
+                <label for="test-ingredient">Ingredient:</label><br>
+                <input type="text" id="test-ingredient" list="ingredient-list" style="width: 150px;">
+            </div>
+            <div>
+                <label for="test-amount">Amount:</label><br>
+                <input type="number" id="test-amount" value="1" step="0.1" style="width: 60px;">
+            </div>
+            <div>
+                <label for="test-unit">Unit:</label><br>
+                <select id="test-unit" style="width: 120px;">
+                    {% for unit in units %}
+                    <option value="{{ unit }}">{{ unit }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="button" id="run-api-test" style="height: 30px; background-color: #4CAF50; color: white; border: none; cursor: pointer; padding: 0 15px;">
+                Test API
+            </button>
+        </div>
+        <div id="api-result" style="margin-top: 10px; font-family: monospace; white-space: pre-wrap; display: none;"></div>
+    </div>
+
+    <script>
+    document.getElementById('run-api-test').addEventListener('click', function() {
+        const ingredient = document.getElementById('test-ingredient').value.trim();
+        const amount = document.getElementById('test-amount').value;
+        const unit = document.getElementById('test-unit').value;
+        const resultDiv = document.getElementById('api-result');
+
+        if (!ingredient) {
+            resultDiv.textContent = 'Please enter an ingredient name';
+            resultDiv.style.display = 'block';
+            return;
+        }
+
+        resultDiv.textContent = `Testing API: /api/ingredient/${ingredient}/?amount=${amount}&unit=${unit}\n`;
+        resultDiv.style.display = 'block';
+
+        fetch(`/api/ingredient/${encodeURIComponent(ingredient)}/?amount=${amount}&unit=${encodeURIComponent(unit)}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Direct API test response:', data);
+
+                let result = resultDiv.textContent;
+                result += '\nAPI Response:\n';
+                result += `- Success: ${data.success}\n`;
+
+                if (data.success) {
+                    result += `- Name: ${data.name}\n`;
+                    result += `- Base Unit: ${data.base_unit}\n`;
+                    result += `- Conversion: ${amount} ${unit} → ${data.converted_amount} ${data.base_unit}\n`;
+                    result += `- Calories: ${data.calories}\n`;
+                    result += `- Protein: ${data.protein}g\n`;
+                    result += `- Carbs: ${data.carbs}g\n`;
+                    result += `- Fat: ${data.fat}g\n`;
+                } else {
+                    result += `- Error: ${data.error}\n`;
+                }
+
+                resultDiv.textContent = result;
+            })
+            .catch(error => {
+                resultDiv.textContent += `\nError: ${error.message}`;
+            });
+    });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add a custom debug button
+            const container = document.getElementById('ingredient-container');
+            if (container) {
+                const debugButton = document.createElement('button');
+                debugButton.type = 'button';
+                debugButton.textContent = 'Debug Unit Values';
+                debugButton.style.marginTop = '10px';
+                debugButton.style.backgroundColor = '#ffcc00';
+                debugButton.style.padding = '5px 10px';
+
+                debugButton.addEventListener('click', function() {
+                    debugIngredientUnits();
+                });
+
+                container.parentNode.insertBefore(debugButton, container.nextSibling);
+            }
+
+            function debugIngredientUnits() {
+                console.clear();
+                console.log('=== DEBUGGING INGREDIENT UNITS ===');
+
+                const rows = document.querySelectorAll('.ingredient-row');
+                console.log(`Found ${rows.length} ingredient rows`);
+
+                rows.forEach((row, index) => {
+                    const nameInput = row.querySelector('input[name="ingredient_name[]"]');
+                    const amountInput = row.querySelector('input[name="ingredient_amount[]"]');
+                    const unitSelect = row.querySelector('select[name="ingredient_unit[]"]');
+
+                    console.log(`\nRow ${index + 1}:`);
+                    console.log('- Name:', nameInput ? nameInput.value : 'not found');
+                    console.log('- Amount:', amountInput ? amountInput.value : 'not found');
+
+                    if (unitSelect) {
+                        console.log('- Unit select found:');
+                        console.log('  - Selected index:', unitSelect.selectedIndex);
+                        console.log('  - Selected option:', unitSelect.options[unitSelect.selectedIndex]?.text);
+                        console.log('  - Value:', unitSelect.value);
+
+                        // Check if the value attribute is present on options
+                        console.log('  - Options:');
+                        Array.from(unitSelect.options).forEach((opt, i) => {
+                            console.log(`    ${i}: text="${opt.text}", value="${opt.value}"`);
+                        });
+                    } else {
+                        console.log('- Unit select: not found');
+                    }
+
+                    // Try to make an API call directly
+                    if (nameInput && nameInput.value && unitSelect && unitSelect.value) {
+                        const testUrl = `/api/ingredient/${encodeURIComponent(nameInput.value)}/?amount=1&unit=${encodeURIComponent(unitSelect.value)}`;
+                        console.log('\nTesting API call:', testUrl);
+
+                        fetch(testUrl)
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('API Response:', data);
+                            })
+                            .catch(error => {
+                                console.error('API Error:', error);
+                            });
+                    }
+                });
+
+                console.log('\n=== FORM STRUCTURE ===');
+                const form = document.querySelector('form');
+                const formHtml = form.innerHTML;
+                console.log('Form HTML (abbreviated):', formHtml.substring(0, 500) + '...');
+
+                console.log('\n=== CHECKING addIngredientRow FUNCTION ===');
+                if (typeof addIngredientRow === 'function') {
+                    console.log('addIngredientRow function exists');
+                    console.log(addIngredientRow.toString());
+                } else {
+                    console.log('addIngredientRow function not found!');
+                }
+            }
+        });
     </script>
 </body>
 </html>

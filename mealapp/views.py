@@ -8,6 +8,7 @@ from django.urls import path
 import json
 from django.views.decorators.http import require_http_methods
 from django.core.serializers import serialize
+from .models import UnitConversion
 
 MEAL_PLAN = MealPlan()
 
@@ -17,24 +18,166 @@ def home(request):
     """
     return render(request, "base.html")
 
-# mealapp/views.py - modify ingredient_detail
+def test_conversion(request):
+    """
+    Simple page to test unit conversions directly.
+    """
+    return render(request, "test_conversion.html")
+def manage_unit_conversions(request):
+    """
+    View for managing unit conversions - adding, viewing, and deleting.
+    """
+    context = {}
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+
+        if action == "add":
+            from_unit = request.POST.get("from_unit", "").strip().lower()
+            to_unit = request.POST.get("to_unit", "").strip().lower()
+            conversion_factor = request.POST.get("conversion_factor")
+
+            if not from_unit or not to_unit or not conversion_factor:
+                context["error"] = "All fields are required."
+            else:
+                try:
+                    conversion_factor = float(conversion_factor)
+
+                    # Check if the conversion already exists
+                    existing = UnitConversion.objects.filter(
+                        from_unit=from_unit,
+                        to_unit=to_unit
+                    ).exists()
+
+                    if existing:
+                        context["error"] = f"A conversion from {from_unit} to {to_unit} already exists."
+                    else:
+                        # Create the conversion
+                        UnitConversion.objects.create(
+                            from_unit=from_unit,
+                            to_unit=to_unit,
+                            conversion_factor=conversion_factor
+                        )
+
+                        # Create the reverse conversion automatically
+                        if from_unit != to_unit:  # Avoid creating self-references
+                            UnitConversion.objects.create(
+                                from_unit=to_unit,
+                                to_unit=from_unit,
+                                conversion_factor=1.0/conversion_factor
+                            )
+
+                        context["success"] = f"Conversion added: 1 {from_unit} = {conversion_factor} {to_unit}"
+                except ValueError:
+                    context["error"] = "Conversion factor must be a number."
+
+        elif action == "delete":
+            conversion_id = request.POST.get("conversion_id")
+            try:
+                conversion = UnitConversion.objects.get(id=conversion_id)
+
+                # Try to find and delete the reverse conversion too
+                try:
+                    reverse_conversion = UnitConversion.objects.get(
+                        from_unit=conversion.to_unit,
+                        to_unit=conversion.from_unit
+                    )
+                    reverse_conversion.delete()
+                except UnitConversion.DoesNotExist:
+                    pass  # No reverse conversion found
+
+                conversion.delete()
+                context["success"] = "Conversion deleted successfully."
+            except UnitConversion.DoesNotExist:
+                context["error"] = "Conversion not found."
+
+    # Get all conversions for display
+    context["conversions"] = UnitConversion.objects.all()
+
+    return render(request, "unit_conversions.html", context)
+
 def ingredient_detail(request, ingredient_name):
+    """
+    API endpoint to get ingredient details with unit conversion.
+    Enhanced with more detailed debug information.
+    """
     try:
+        # Try to find the ingredient by name (case-insensitive)
         ingredient = Ingredient.objects.get(name__iexact=ingredient_name.strip())
-        unit = request.GET.get('unit', ingredient.base_unit)
-        amount = float(request.GET.get('amount', 1))
 
-        converted_amount = ingredient.get_converted_amount(amount, unit)
+        # Get the unit and amount from query parameters
+        unit = request.GET.get('unit', ingredient.base_unit).lower().strip()
+        try:
+            amount = float(request.GET.get('amount', 1))
+        except (ValueError, TypeError):
+            amount = 1.0
 
-        data = {
-            "success": True,
-            "calories": float(ingredient.calories_per_unit or 0) * converted_amount,
-            "protein": float(ingredient.protein_per_unit or 0) * converted_amount,
-            "carbs": float(ingredient.carbs_per_unit or 0) * converted_amount,
-            "fat": float(ingredient.fat_per_unit or 0) * converted_amount,
-        }
+        # Print debug info to server logs
+        print(f"DEBUG: Converting {amount} {unit} of {ingredient.name} (base unit: {ingredient.base_unit})")
+
+        # Try to find a direct conversion
+        direct_conversion = None
+        try:
+            direct_conversion = UnitConversion.objects.get(
+                from_unit=unit,
+                to_unit=ingredient.base_unit
+            )
+            print(f"DEBUG: Found direct conversion: 1 {unit} = {direct_conversion.conversion_factor} {ingredient.base_unit}")
+        except UnitConversion.DoesNotExist:
+            print(f"DEBUG: No direct conversion found from {unit} to {ingredient.base_unit}")
+
+        # Convert the amount
+        try:
+            converted_amount = ingredient.get_converted_amount(amount, unit)
+            print(f"DEBUG: Converted amount: {converted_amount} {ingredient.base_unit}")
+
+            # Prepare the response data
+            data = {
+                "success": True,
+                "name": ingredient.name,
+                "base_unit": ingredient.base_unit,
+                "original_unit": unit,
+                "original_amount": amount,
+                "converted_amount": converted_amount,
+                "calories": float(ingredient.calories_per_unit or 0) * converted_amount,
+                "protein": float(ingredient.protein_per_unit or 0) * converted_amount,
+                "carbs": float(ingredient.carbs_per_unit or 0) * converted_amount,
+                "fat": float(ingredient.fat_per_unit or 0) * converted_amount,
+            }
+
+            # Add conversion path info
+            if direct_conversion:
+                data["conversion_info"] = f"Using direct conversion: 1 {unit} = {direct_conversion.conversion_factor} {ingredient.base_unit}"
+            elif unit != ingredient.base_unit:
+                data["conversion_info"] = "Used multi-step conversion or fallback"
+
+        except Exception as e:
+            # Log the conversion error but still return a response with defaults
+            print(f"DEBUG: Conversion error: {str(e)}")
+            data = {
+                "success": True,
+                "name": ingredient.name,
+                "base_unit": ingredient.base_unit,
+                "original_unit": unit,
+                "original_amount": amount,
+                "warning": "Conversion unavailable, using unconverted values",
+                "calories": float(ingredient.calories_per_unit or 0) * amount,
+                "protein": float(ingredient.protein_per_unit or 0) * amount,
+                "carbs": float(ingredient.carbs_per_unit or 0) * amount,
+                "fat": float(ingredient.fat_per_unit or 0) * amount,
+            }
+
     except Ingredient.DoesNotExist:
-        data = {"success": False, "error": "Ingredient not found"}
+        data = {
+            "success": False,
+            "error": f"Ingredient '{ingredient_name}' not found"
+        }
+    except Exception as e:
+        data = {
+            "success": False,
+            "error": f"An error occurred: {str(e)}"
+        }
+
     return JsonResponse(data)
 
 def check_ingredient(request, name):
@@ -160,27 +303,14 @@ def meal_plan_view(request):
     return render(request, "meal_plan.html", context)
 @csrf_exempt
 def add_ingredient(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        ingredient = Ingredient.objects.create(
-            name=data['name'],
-            aisle=int(data['aisle']),
-            calories_per_unit=float(data['calories_per_unit'] or 0),
-            protein_per_unit=float(data['protein_per_unit'] or 0),
-            carbs_per_unit=float(data['carbs_per_unit'] or 0),
-            fat_per_unit=float(data['fat_per_unit'] or 0)
-        )
-        return JsonResponse({'success': True})
-    return JsonResponse({'success': False}, status=400)
-
-def add_ingredient(request):
     """
     Handles the creation of a new ingredient in the database.
+    Fixed to properly save the base_unit.
     """
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
         aisle = request.POST.get("aisle", "").strip()
-
+        base_unit = request.POST.get("base_unit", "unit").strip()  # Get base_unit
 
         calories = request.POST.get("calories_per_unit", "")
         protein = request.POST.get("protein_per_unit", "")
@@ -191,7 +321,7 @@ def add_ingredient(request):
         if not name:
             return render(request, "add_ingredient.html", {
                 "error": "Ingredient name is required.",
-                "aisles_list": aisles_list.values(),  # Pass aisle names
+                "aisles_list": aisles_list.items(),  # Pass aisle names
             })
 
         try:
@@ -200,24 +330,45 @@ def add_ingredient(request):
             # Convert nutrition values to float if they're not empty
             defaults = {
                 "aisle": aisle_index,
+                "base_unit": base_unit,  # Include base_unit here
                 "calories_per_unit": float(calories) if calories.strip() else None,
                 "protein_per_unit": float(protein) if protein.strip() else None,
                 "carbs_per_unit": float(carbs) if carbs.strip() else None,
                 "fat_per_unit": float(fat) if fat.strip() else None,
             }
 
-            Ingredient.objects.get_or_create(name=name, defaults=defaults)
+            # Print debug info to server logs
+            print(f"DEBUG: Adding ingredient {name} with base_unit: {base_unit}")
+            print(f"DEBUG: Defaults: {defaults}")
+
+            ingredient, created = Ingredient.objects.get_or_create(name=name, defaults=defaults)
+
+            # If the ingredient already existed, update the base unit and other fields
+            if not created:
+                # Update the base unit and other fields
+                ingredient.base_unit = base_unit
+                ingredient.aisle = aisle_index
+                if calories.strip():
+                    ingredient.calories_per_unit = float(calories)
+                if protein.strip():
+                    ingredient.protein_per_unit = float(protein)
+                if carbs.strip():
+                    ingredient.carbs_per_unit = float(carbs)
+                if fat.strip():
+                    ingredient.fat_per_unit = float(fat)
+                ingredient.save()
+
+                print(f"DEBUG: Updated existing ingredient {name}, base_unit is now: {ingredient.base_unit}")
+
             return redirect("view_ingredients")
         except ValueError:
             return render(request, "add_ingredient.html", {
-                "error": "Invalid aisle selected.",
-                "aisles_list": aisles_list.values(),  # Pass aisle names
+                "error": "Invalid input values.",
+                "aisles_list": aisles_list.items(),  # Pass aisle names
             })
 
     # Pass aisle names for dropdown
     return render(request, "add_ingredient.html", {"aisles_list": aisles_list.items()})
-
-
 # mealapp/views.py
 def delete_recipe(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
@@ -228,7 +379,8 @@ def delete_ingredient(request, ingredient_id):
     ingredient = get_object_or_404(Ingredient, id=ingredient_id)
     ingredient.delete()
     return redirect('view_ingredients')
-# mealapp/views.py - modify view_ingredients function
+
+
 def view_ingredients(request):
     if request.method == "POST":
         if "delete" in request.POST:
@@ -237,11 +389,30 @@ def view_ingredients(request):
         else:
             ingredient_id = request.POST.get("ingredient_id")
             ingredient = Ingredient.objects.get(id=ingredient_id)
-            ingredient.calories_per_unit = request.POST.get("calories_per_unit")
-            ingredient.protein_per_unit = request.POST.get("protein_per_unit")
-            ingredient.carbs_per_unit = request.POST.get("carbs_per_unit")
-            ingredient.fat_per_unit = request.POST.get("fat_per_unit")
+
+            # Update all fields including base_unit
+            base_unit = request.POST.get("base_unit", "unit")
+            ingredient.base_unit = base_unit
+
+            # Update nutrition values
+            calories = request.POST.get("calories_per_unit", "")
+            protein = request.POST.get("protein_per_unit", "")
+            carbs = request.POST.get("carbs_per_unit", "")
+            fat = request.POST.get("fat_per_unit", "")
+
+            if calories.strip():
+                ingredient.calories_per_unit = float(calories)
+            if protein.strip():
+                ingredient.protein_per_unit = float(protein)
+            if carbs.strip():
+                ingredient.carbs_per_unit = float(carbs)
+            if fat.strip():
+                ingredient.fat_per_unit = float(fat)
+
             ingredient.save()
+
+            # Print debug info
+            print(f"DEBUG: Updated ingredient {ingredient.name}, base_unit is now: {ingredient.base_unit}")
 
     ingredients = Ingredient.objects.all()
     return render(request, "view_ingredients.html", {"ingredients": ingredients})
@@ -251,17 +422,28 @@ def generate_grocery_list(request):
         num_people = int(request.POST.get("num_people", 1))
         g_list = GroceryList()
 
-        for day_recipes in MEAL_PLAN.days.values():
-            for recipe in day_recipes:
-                g_list.add_recipe(recipe, servings=recipe.servings)
+        # Get meal plan from session
+        meal_plan = get_meal_plan(request)
 
+        # Process each day in the meal plan
+        for day, recipes_data in meal_plan.items():
+            for recipe_data in recipes_data:
+                try:
+                    recipe_id = recipe_data['recipe_id']
+                    recipe_servings = recipe_data['servings']
+                    recipe = Recipe.objects.get(id=recipe_id)
+                    g_list.add_recipe(recipe, servings=recipe_servings * num_people)
+                except (KeyError, Recipe.DoesNotExist):
+                    continue
+
+        # Organize grocery items by aisle
         categorized = {}
         for item in g_list.grocery_items.values():
             ing = item["ingredient"]
             aisle = ing.aisle
             if aisle not in categorized:
                 categorized[aisle] = []
-            categorized[aisle].append((ing.name, {unit: amount * num_people for unit, amount in item["units"].items()}))
+            categorized[aisle].append((ing.name, item["units"]))
 
         return render(request, "grocery_list_partial.html", {
             "categorized": categorized,
@@ -269,33 +451,57 @@ def generate_grocery_list(request):
             "num_people": num_people,
         })
 
-    return redirect("meal_plan_view")
+    return redirect("meal_plan")
+# def generate_grocery_list(request):
+#     if request.method == "POST":
+#         num_people = int(request.POST.get("num_people", 1))
+#         g_list = GroceryList()
+
+#         for day_recipes in MEAL_PLAN.days.values():
+#             for recipe in day_recipes:
+#                 g_list.add_recipe(recipe, servings=recipe.servings)
+
+#         categorized = {}
+#         for item in g_list.grocery_items.values():
+#             ing = item["ingredient"]
+#             aisle = ing.aisle
+#             if aisle not in categorized:
+#                 categorized[aisle] = []
+#             categorized[aisle].append((ing.name, {unit: amount * num_people for unit, amount in item["units"].items()}))
+
+#         return render(request, "grocery_list_partial.html", {
+#             "categorized": categorized,
+#             "aisles_list": aisles_list,
+#             "num_people": num_people,
+#         })
+
+#     return redirect("meal_plan_view")
 
 
-def generate_grocery_list(request):
-    if request.method == "POST":
-        num_people = int(request.POST.get("num_people", 1))
-        g_list = GroceryList()
+# def generate_grocery_list(request):
+#     if request.method == "POST":
+#         num_people = int(request.POST.get("num_people", 1))
+#         g_list = GroceryList()
 
-        for day_recipes in MEAL_PLAN.days.values():
-            for recipe in day_recipes:
-                g_list.add_recipe(recipe, servings=recipe.servings * num_people)
+#         for day_recipes in MEAL_PLAN.days.values():
+#             for recipe in day_recipes:
+#                 g_list.add_recipe(recipe, servings=recipe.servings * num_people)
 
-        categorized = {}
-        for item in g_list.grocery_items.values():
-            ing = item["ingredient"]
-            aisle = ing.aisle
-            if aisle not in categorized:
-                categorized[aisle] = []
-            categorized[aisle].append((ing.name, {unit: amount * num_people for unit, amount in item["units"].items()}))
+#         categorized = {}
+#         for item in g_list.grocery_items.values():
+#             ing = item["ingredient"]
+#             aisle = ing.aisle
+#             if aisle not in categorized:
+#                 categorized[aisle] = []
+#             categorized[aisle].append((ing.name, {unit: amount * num_people for unit, amount in item["units"].items()}))
 
-        return render(request, "grocery_list_partial.html", {
-            "categorized": categorized,
-            "aisles_list": aisles_list,
-            "num_people": num_people,
-        })
+#         return render(request, "grocery_list_partial.html", {
+#             "categorized": categorized,
+#             "aisles_list": aisles_list,
+#             "num_people": num_people,
+#         })
 
-    return redirect("meal_plan_view")
+#     return redirect("meal_plan_view")
 
 
 def add_recipe(request):

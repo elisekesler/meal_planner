@@ -1,0 +1,81 @@
+<!-- mealapp/templates/unit_conversions.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Unit Conversions</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <h2>Manage Unit Conversions</h2>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    {% if success %}
+        <p style="color: green;">{{ success }}</p>
+    {% endif %}
+
+    <div style="margin-bottom: 30px;">
+        <h3>Add New Conversion</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <div style="margin-bottom: 15px;">
+                <label for="from_unit">From Unit:</label>
+                <input type="text" name="from_unit" required>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label for="to_unit">To Unit:</label>
+                <input type="text" name="to_unit" required>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label for="conversion_factor">Conversion Factor:</label>
+                <input type="number" step="0.0001" name="conversion_factor" required>
+                <small>1 [from_unit] = [conversion_factor] [to_unit]</small>
+            </div>
+
+            <button type="submit" name="action" value="add">Add Conversion</button>
+        </form>
+    </div>
+
+    <h3>Existing Conversions</h3>
+    {% if conversions %}
+        <table border="1" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>From Unit</th>
+                    <th>To Unit</th>
+                    <th>Conversion Factor</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for conversion in conversions %}
+                <tr>
+                    <td>{{ conversion.from_unit }}</td>
+                    <td>{{ conversion.to_unit }}</td>
+                    <td>{{ conversion.conversion_factor }}</td>
+                    <td>
+                        <form method="POST" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="conversion_id" value="{{ conversion.id }}">
+                            <button type="submit" name="action" value="delete"
+                                    onclick="return confirm('Are you sure you want to delete this conversion?')">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No conversions available.</p>
+    {% endif %}
+
+    <p><a href="{% url 'home' %}">Back to Home</a></p>
+</body>
+</html>

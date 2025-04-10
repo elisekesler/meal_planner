@@ -422,17 +422,28 @@ def generate_grocery_list(request):
         num_people = int(request.POST.get("num_people", 1))
         g_list = GroceryList()
 
-        for day_recipes in MEAL_PLAN.days.values():
-            for recipe in day_recipes:
-                g_list.add_recipe(recipe, servings=recipe.servings)
+        # Get meal plan from session
+        meal_plan = get_meal_plan(request)
 
+        # Process each day in the meal plan
+        for day, recipes_data in meal_plan.items():
+            for recipe_data in recipes_data:
+                try:
+                    recipe_id = recipe_data['recipe_id']
+                    recipe_servings = recipe_data['servings']
+                    recipe = Recipe.objects.get(id=recipe_id)
+                    g_list.add_recipe(recipe, servings=recipe_servings * num_people)
+                except (KeyError, Recipe.DoesNotExist):
+                    continue
+
+        # Organize grocery items by aisle
         categorized = {}
         for item in g_list.grocery_items.values():
             ing = item["ingredient"]
             aisle = ing.aisle
             if aisle not in categorized:
                 categorized[aisle] = []
-            categorized[aisle].append((ing.name, {unit: amount * num_people for unit, amount in item["units"].items()}))
+            categorized[aisle].append((ing.name, item["units"]))
 
         return render(request, "grocery_list_partial.html", {
             "categorized": categorized,
@@ -440,33 +451,57 @@ def generate_grocery_list(request):
             "num_people": num_people,
         })
 
-    return redirect("meal_plan_view")
+    return redirect("meal_plan")
+# def generate_grocery_list(request):
+#     if request.method == "POST":
+#         num_people = int(request.POST.get("num_people", 1))
+#         g_list = GroceryList()
+
+#         for day_recipes in MEAL_PLAN.days.values():
+#             for recipe in day_recipes:
+#                 g_list.add_recipe(recipe, servings=recipe.servings)
+
+#         categorized = {}
+#         for item in g_list.grocery_items.values():
+#             ing = item["ingredient"]
+#             aisle = ing.aisle
+#             if aisle not in categorized:
+#                 categorized[aisle] = []
+#             categorized[aisle].append((ing.name, {unit: amount * num_people for unit, amount in item["units"].items()}))
+
+#         return render(request, "grocery_list_partial.html", {
+#             "categorized": categorized,
+#             "aisles_list": aisles_list,
+#             "num_people": num_people,
+#         })
+
+#     return redirect("meal_plan_view")
 
 
-def generate_grocery_list(request):
-    if request.method == "POST":
-        num_people = int(request.POST.get("num_people", 1))
-        g_list = GroceryList()
+# def generate_grocery_list(request):
+#     if request.method == "POST":
+#         num_people = int(request.POST.get("num_people", 1))
+#         g_list = GroceryList()
 
-        for day_recipes in MEAL_PLAN.days.values():
-            for recipe in day_recipes:
-                g_list.add_recipe(recipe, servings=recipe.servings * num_people)
+#         for day_recipes in MEAL_PLAN.days.values():
+#             for recipe in day_recipes:
+#                 g_list.add_recipe(recipe, servings=recipe.servings * num_people)
 
-        categorized = {}
-        for item in g_list.grocery_items.values():
-            ing = item["ingredient"]
-            aisle = ing.aisle
-            if aisle not in categorized:
-                categorized[aisle] = []
-            categorized[aisle].append((ing.name, {unit: amount * num_people for unit, amount in item["units"].items()}))
+#         categorized = {}
+#         for item in g_list.grocery_items.values():
+#             ing = item["ingredient"]
+#             aisle = ing.aisle
+#             if aisle not in categorized:
+#                 categorized[aisle] = []
+#             categorized[aisle].append((ing.name, {unit: amount * num_people for unit, amount in item["units"].items()}))
 
-        return render(request, "grocery_list_partial.html", {
-            "categorized": categorized,
-            "aisles_list": aisles_list,
-            "num_people": num_people,
-        })
+#         return render(request, "grocery_list_partial.html", {
+#             "categorized": categorized,
+#             "aisles_list": aisles_list,
+#             "num_people": num_people,
+#         })
 
-    return redirect("meal_plan_view")
+#     return redirect("meal_plan_view")
 
 
 def add_recipe(request):

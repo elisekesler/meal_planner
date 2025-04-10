@@ -1,14 +1,7 @@
-<!-- mealapp/templates/grocery_list.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Grocery List</title>
-    {% load static %}
-    <!-- Link to your CSS file -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-<h2>Grocery List for {{ num_people }} People </h2>
+<!-- mealapp/templates/grocery_list_partial.html -->
+{% load myfilters %}
+
+<h2>Grocery List for {{ num_people }} People</h2>
 
 {% if categorized %}
   {% for aisle, items in categorized.items %}
@@ -18,7 +11,7 @@
         <li>
           <strong>{{ name }}</strong>:
           {% for unit, amount in units.items %}
-            {{ amount|floatformat:2 }} {{ unit }}
+            {{ amount|floatformat:2 }} {{ unit }}{% if not forloop.last %}, {% endif %}
           {% endfor %}
         </li>
       {% endfor %}
@@ -27,3 +20,5 @@
 {% else %}
   <p>No items in the grocery list.</p>
 {% endif %}
+
+<p><a href="{% url 'meal_plan' %}">Back to Meal Plan</a></p>

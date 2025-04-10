@@ -5,11 +5,15 @@ from django import template
 register = template.Library()
 
 @register.filter
-def get_item(dictionary_or_list, key):
+def get_item(dictionary, key):
     """
-    Safely get the item from a dictionary or list by key/index.
+    Safely get the item from a dictionary by key.
+    Works with numeric keys too.
     """
     try:
-        return dictionary_or_list[key]
-    except (KeyError, IndexError, TypeError):
-        return ""  # or some fallback
+        # Try to convert key to int if it's a string but represents a number
+        if isinstance(key, str) and key.isdigit():
+            key = int(key)
+        return dictionary.get(key, f"Aisle {key}")
+    except (KeyError, AttributeError):
+        return f"Aisle {key}"

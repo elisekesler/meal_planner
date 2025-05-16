@@ -11,6 +11,7 @@
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <!-- Load Lucide library correctly -->
     <script src="https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js"></script>
+    <link rel="icon" href="data:,">
     <!-- Pass recipe data to JavaScript -->
     <script>
         window.allRecipes = {{ all_recipes|safe }};
@@ -179,6 +180,50 @@
             font-size: 0.8rem;
             color: #718096;
         }
+
+        .day-content {
+            display: flex;
+            gap: 20px;
+        }
+
+        .day-recipes {
+            flex: 3;
+        }
+
+        .day-nutrition {
+            flex: 1;
+            min-width:200px;
+        }
+
+        .day-nutrition-card {
+            background-color: #e6fffa;
+            border-radius: 6px;
+            padding: 15px;
+            border-left: 4px solid #4fd1c5;
+        }
+
+        .nutrition-title {
+            font-weight: 600;
+            color: #2c7a7b;
+            margin-bottom: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .nutrition-details {
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .day-content {
+                flex-direction: column;
+            }
+
+            .day-nutrition {
+                margin-top: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -221,12 +266,26 @@
             {% else %}
                 <p>No recipes planned for this day</p>
             {% endif %}
+        </div
+
+                <div class="day-nutrition">
+                    <div class="day-nutrition-card">
+                        <div class="nutrition-title">Daily Nutrition Per Person</div>
+                        <div class="nutrition-details">
+                            Calories: {{ daily_nutrition|get_item:day|get_item:'calories'|floatformat:0 }}<br>
+                            Protein: {{ daily_nutrition|get_item:day|get_item:'protein'|floatformat:1 }} g<br>
+                            Fat: {{ daily_nutrition|get_item:day|get_item:'fat'|floatformat:1 }} g<br>
+                            Carbs: {{ daily_nutrition|get_item:day|get_item:'carbs'|floatformat:1 }} g
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         {% endfor %}
 
         <hr>
         <div class="card nutrition-card">
-            <h3>Total Nutrition Per Person</h3>
+            <h3>Total Nutrition Per Person (Weekly) </h3>
             <p>
                 Calories: {{ totals.calories|floatformat:1 }}<br>
                 Protein: {{ totals.protein|floatformat:1 }} g<br>

@@ -230,15 +230,24 @@ def meal_plan_view(request):
     # Get meal plan from session
     meal_plan = get_meal_plan(request)
     print(f"Retrieved meal plan from session: {meal_plan}")
-
     meal_plan_with_details = {}
     totals = {"calories": 0, "protein": 0, "fat": 0, "carbs": 0}
 
     # Process each day
     for day, recipes in meal_plan.items():
         day_key = f"Day {day}"
-        print(f"\nProcessing {day_key} with recipes: {recipes}")
         meal_plan_with_details[day_key] = []
+        # Initialize nutrition counters for each day
+        daily_nutrition = {}
+        daily_nutrition[day_key] = {
+            "calories": 0,
+            "protein": 0,
+            "fat": 0,
+            "carbs": 0
+        }
+        # day_key = f"Day {day}"
+        # print(f"\nProcessing {day_key} with recipes: {recipes}")
+        # meal_plan_with_details[day_key] = []
 
         for recipe_data in recipes:
             try:
@@ -265,19 +274,22 @@ def meal_plan_view(request):
                     "ingredients": ingredients,
                     "servings": recipe_servings * num_people  # Total servings for all people
                 })
-
-                # Update totals with scaled nutrition values
-                totals["calories"] += recipe.calories_per_serving * recipe_servings * num_people
-                totals["protein"] += recipe.protein_per_serving * recipe_servings * num_people
-                totals["fat"] += recipe.fat_per_serving * recipe_servings * num_people
-                totals["carbs"] += recipe.carbs_per_serving * recipe_servings * num_people
-
             except Recipe.DoesNotExist:
                 print(f"Recipe with id {recipe_id} not found")
                 continue
             except KeyError as e:
                 print(f"Missing key in recipe data: {e}")
                 continue
+        for day in daily_nutrition:
+            for nutrient in daily_nutrition[day]:
+                daily_nutrition[day][nutrient] = daily_nutrition[day][nutrient] / num_people
+
+
+                # # Update totals with scaled nutrition values
+                totals["calories"] += recipe.calories_per_serving * recipe_servings / num_people
+                totals["protein"] += recipe.protein_per_serving * recipe_servings / num_people
+                totals["fat"] += recipe.fat_per_serving * recipe_servings / num_people
+                totals["carbs"] += recipe.carbs_per_serving * recipe_servings / num_people
 
     print(f"\nFinal meal_plan_with_details: {meal_plan_with_details}")
 
@@ -295,6 +307,7 @@ def meal_plan_view(request):
     context = {
         "meal_plan": meal_plan_with_details,
         "totals": totals,
+        "daily_nutrition": daily_nutrition,
         "all_recipes": json.dumps(recipes_data),
         "num_people": num_people,
     }
